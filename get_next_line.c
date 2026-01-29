@@ -117,9 +117,10 @@ int main(void)
 
 	while ((line = get_next_line(fd)) != NULL)
 	{
-		printf("%s\n", line);
+		write(1, line, ft_strlen(line));
 		free(line);
 	}
 	close(fd);
+	write(1, "\n", 1);
 	return (0);
 }
