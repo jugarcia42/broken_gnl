@@ -71,20 +71,27 @@ void	*ft_memmove(void *dest, const void *src, size_t n)
 char	*get_next_line(int fd)
 {
 	static char	b[BUFFER_SIZE + 1] = "";
-	char	*ret = NULL;
+	char		*ret = NULL;
+	char		*tmp;
+	int			read_ret;
 
-	char	*tmp = ft_strchr(b, '\n');
-	while (!tmp)
+	tmp = ft_strchr(b, '\n');
+	read_ret = 1;
+	while (!tmp && read_ret > 0)
 	{
-		if (!str_append_str(&ret, b))
+		if (*b)
+		{
+			if (!str_append_str(&ret, b))
+				return (NULL);
+			b[0] = '\0';
+		}
+		read_ret = read(fd, b, BUFFER_SIZE);
+		if (read_ret < 0)
+		{
+			free(ret);
 			return (NULL);
-		b[0] = '\0';
-		int	read_ret = read(fd, b, BUFFER_SIZE);
-		if (read_ret == -1)
-			return (NULL);
-		if (read_ret == 0)
-            break;
-		b[read_ret] = 0;
+		}
+		b[read_ret] = '\0';
 		tmp = ft_strchr(b, '\n');
 	}
 	if (tmp)
@@ -100,27 +107,10 @@ char	*get_next_line(int fd)
 	{
 		b[0] = '\0';
 		if (!ret || !*ret)
-        {
-            free(ret);
-            return (NULL);
-        }
+		{
+			free(ret);
+			return (NULL);
+		}
 	}
 	return (ret);
-}
-
-#include <stdio.h>
-#include <fcntl.h>
-int main(void)
-{
-	int fd = open("test.txt", O_RDONLY);
-	char *line;
-
-	while ((line = get_next_line(fd)) != NULL)
-	{
-		write(1, line, ft_strlen(line));
-		free(line);
-	}
-	close(fd);
-	write(1, "\n", 1);
-	return (0);
 }
